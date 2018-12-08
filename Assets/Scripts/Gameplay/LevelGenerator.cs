@@ -42,15 +42,16 @@ public class LevelGenerator
 	}
 
 	public static List<int> RandomZoneMap(int shortJump, int mediumJump,int longJump, int maxJumpDist){
-		int minJumpDist = (maxJumpDist + 1) / 2;
+		int minJumpDist = Mathf.Max(1, maxJumpDist / 3);
 		int totalJump = shortJump + mediumJump + longJump;
 
 		//Random jump list with number of each jump type was been given.
 		List<JumpType> jumpLine = RandomJumpList (shortJump, mediumJump, longJump);
 
 		//Then slice it to some small group. For player have a break time. 
+		//Expect each group will have 3 jumps. 
 		List<List<JumpType>> jumpGroupLine = new List<List<JumpType>> ();
-		int minJumpGroup = totalJump / 2;
+		int minJumpGroup = totalJump / 3;
 		int jumpGroupCount = minJumpGroup +  (int)Mathf.Sqrt(UnityEngine.Random.Range (0, minJumpGroup * minJumpGroup));
 
 		//Give [totalJump] jump to [jumpGroupCoun]t group ([totalJump] > [jumpGroupCount])
@@ -70,7 +71,7 @@ public class LevelGenerator
 		List<int> heightMap = new List<int> ();
 
 		for (int i = 0; i < jumpGroupCount; i++) {
-			int pad = UnityEngine.Random.Range (maxJumpDist, maxJumpDist * 3);
+			int pad = UnityEngine.Random.Range (maxJumpDist, maxJumpDist * 2);
 		
 			for (int p = 0; p < pad; p++) {
 				singleLine += '_';
@@ -94,7 +95,7 @@ public class LevelGenerator
 				}
 
 				//int shortPad = UnityEngine.Random.Range(minJumpDist, minJumpDist * 2);
-				int shortPad = minJumpDist;
+				int shortPad = (maxJumpDist + minJumpDist) / 2;
 				if (j == jumpGroupLine [i].Count - 1) {
 					shortPad = 0;
 				}

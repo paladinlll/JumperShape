@@ -14,6 +14,7 @@ public class InitScreen : MonoBehaviour {
 		//LeanTween.value(m_tapImage.gameObject, 0, 2, 0.5f).setLoopPingPong().setOnUpdate((val) => {
 		//	m_tapImage.color = new Color(1, 1, 1, val > 1 ? 1 : val);
 		//});
+		GameServerAPI.Instance.Init();
 	}
 
 	void OnDestroy() {

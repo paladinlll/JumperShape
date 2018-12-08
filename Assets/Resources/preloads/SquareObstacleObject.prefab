@@ -37,7 +37,7 @@ GameObject:
   m_Component:
   - component: {fileID: 224333784228573616}
   - component: {fileID: 61007656197900850}
-  - component: {fileID: 114124898508926090}
+  - component: {fileID: 114377296840798826}
   m_Layer: 10
   m_Name: SquareObstacleObject
   m_TagString: Obstacle
@@ -57,7 +57,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 40, y: 40}
+  m_Offset: {x: 60, y: 60}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -68,19 +68,8 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 80, y: 80}
+  m_Size: {x: 120, y: 120}
   m_EdgeRadius: 0
---- !u!114 &114124898508926090
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1882769115665292}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e146738ff828e7749b62de31945ba63b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &114366669000371814
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -108,6 +97,17 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114377296840798826
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1882769115665292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eeb7e8109d3dc044b5b29647ba863bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!222 &222113964181255224
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -131,7 +131,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 80, y: 80}
+  m_SizeDelta: {x: 120, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224333784228573616
 RectTransform:
@@ -150,5 +150,5 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 574, y: 0}
-  m_SizeDelta: {x: 80, y: 80}
+  m_SizeDelta: {x: 120, y: 120}
   m_Pivot: {x: 0, y: 0}

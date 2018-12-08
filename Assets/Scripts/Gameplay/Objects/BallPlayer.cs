@@ -36,7 +36,7 @@ public class BallPlayer : BaseObject {
 
 	}
 
-	public virtual void Init()
+	public override void Init()
 	{		
 		m_bJumping = false;
 		m_canKeepJump = false;
@@ -62,12 +62,14 @@ public class BallPlayer : BaseObject {
 //		}
 
 		//BaseObject baseObject = coll.gameObject.GetComponent<BaseObject> ();
-		if (coll.gameObject.tag == "Ground" ||
-			coll.gameObject.tag == "Obstacle") {
+		if (coll.gameObject.tag == "Ground") {
 			if (m_jumpTime > 0.1f) {
 				EndJump ();
 			}
-		}			
+		} else if (coll.gameObject.tag == "Obstacle") {
+			Gameplay.Instance.EndGame (false);
+		}		
+
 	}
 
 	public void SignalJump(){
@@ -98,11 +100,11 @@ public class BallPlayer : BaseObject {
 	public bool DoJump()
 	{
 		if (m_bJumping) {
-			if (m_jumpTime < 0.45f) {
+			if (m_jumpTime < 0.6f) {
 				if (m_canKeepJump) {
 					m_releaseJumpTime = m_jumpTime * 1.1f;
 				} else {
-					return false;
+					return !m_canKeepJump;
 				}
 			} else {
 				return !m_canKeepJump;
@@ -148,7 +150,7 @@ public class BallPlayer : BaseObject {
 		if (m_bJumping) {	
 			m_jumpTime += dtTime;
 			float t = m_jumpTime;
-			float durarion = 0.6f + m_releaseJumpTime;
+			float durarion = 0.45f + m_releaseJumpTime;
 			float maxYFactor = 10 * durarion;
 			//durarion /= Gameplay.Instance.GetCurrenMoveXSpeed ();
 			float nextY = m_beginJumpY + maxYFactor * (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f));

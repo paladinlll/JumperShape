@@ -7,6 +7,16 @@ using System;
 using System.Collections.Specialized;
 using System.Net;
 
+public class ErrorResponse{
+	public long errorCode;
+	public string errorMessage;
+
+	public ErrorResponse(long code, string msg){
+		errorCode = code;
+		errorMessage = msg;
+	}
+};
+
 [DisallowMultipleComponent]
 public class GameServerAPI : MonoBehaviour {
 	static GameServerAPI s_instance = null;
@@ -83,20 +93,20 @@ public class GameServerAPI : MonoBehaviour {
 		}
 	}
 
-	public void PostAPI(string link, WWWForm form, Action<string, string> cb)
+	public void PostAPI(string link, WWWForm form, Action<ErrorResponse, string> cb)
 	{
 		if (!m_initialized)
 		{
 			if (cb != null)
-			{
-				cb("Not initialize yet", "");
+			{				
+				cb(new ErrorResponse(GameDefines.LOCAL_ERROR_NOT_INITIALIZE, "Unreachable host."), "");
 			}
 			return;
 		}
 		StartCoroutine( IPostAPI( m_baseAddress + "/" + link, form, cb));
 	}
 
-	private IEnumerator IPostAPI(string url, WWWForm form, Action<string, string> cb)
+	private IEnumerator IPostAPI(string url, WWWForm form, Action<ErrorResponse, string> cb)
 	{
 		Debug.Log("PostAPI " + url);
 		using (UnityWebRequest www = UnityWebRequest.Post (url, form)) {
@@ -119,11 +129,11 @@ public class GameServerAPI : MonoBehaviour {
 				yield return null;
 			}
 
-
-			if (www.isNetworkError) {				
-				cb (www.error, null);
-			} else {            	
-				Debug.Log(www.downloadHandler.text);
+			if (failed) {
+				cb(new ErrorResponse(GameDefines.LOCAL_ERROR_TIME_OUT, "Time out"), null);
+			} else if (www.isNetworkError) {				
+				cb(new ErrorResponse(www.responseCode, www.error), null);
+			} else {            					
 				cb (null, www.downloadHandler.text);
 			}
 		}			

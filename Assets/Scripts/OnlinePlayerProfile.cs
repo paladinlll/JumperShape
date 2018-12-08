@@ -108,7 +108,7 @@ public class OnlinePlayerProfile: MonoBehaviour
 		GameServerAPI.Instance.PostAPI("signinAnonymous", form
 			, ((err, result) =>
 			{
-				if(!string.IsNullOrEmpty(err))
+				if(err != null)
 				{
 				}
 				else

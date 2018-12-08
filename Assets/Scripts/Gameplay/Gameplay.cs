@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using GameDTO;
+using TMPro;
 
 public class Gameplay : MonoBehaviour {
 	static Gameplay s_instance;
@@ -39,24 +40,23 @@ public class Gameplay : MonoBehaviour {
 	ParallaxBkgController m_parallaxBackground;
 
 	[SerializeField]
-	GameObjectPool m_gameObjectPool;
-
-	[SerializeField]
 	RectTransform m_objectHolder;
-
-	[SerializeField]
-	GameObject m_sampleGround;
-
-	List<GameObject> m_grounds = new List<GameObject>();
 
 	BallPlayer m_ballPlayer;
 
 	[SerializeField]
 	GameObject m_prepareLayer;
 
+	[SerializeField]
+	ResultPopup m_resultPopup;
+
+	[SerializeField]
+	TextMeshProUGUI m_scoreText;
+
 	float m_mapMaxView = 0;
 	float m_mapWeight = 0;
 
+	int m_score;
 	//List<GameObject> m_activeObjects = new List<GameObject>();
 
 	LevelDTO m_workingLevelDTO = new LevelDTO();
@@ -73,22 +73,31 @@ public class Gameplay : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Physics2D.autoSimulation = false;
-		m_prepareLayer.SetActive (false);
+		Reset ();
+
 		//Load minimium object. Will show loading screen until it has done.
 		m_loadingLayer.Show();
 		GameObjectPreloader.Fetch(() =>{
 			m_loadingLayer.Hide();
-			m_prepareLayer.SetActive (true);
 		});
 
-		Reset ();
+
 	}
 
 	public void Reset()
 	{
+		GameObjectPreloader.ClearAll ();
+		m_prepareLayer.SetActive (true);
+		m_resultPopup.gameObject.SetActive (false);
 		m_bEnded = true;
 		m_bPausing = false;
+		m_score = 0;
+		m_scoreText.text = "";
+	}
 
+	public void GainScore(){
+		m_score++;
+		m_scoreText.text = m_score.ToString ();
 	}
 
 	public T SpawnGameObject<T>(string className) where T : BaseObject
@@ -106,6 +115,7 @@ public class Gameplay : MonoBehaviour {
 		};
 
 		if (baseObject != null) {
+			baseObject.Init ();
 			baseObject.transform.SetParent (m_objectHolder.transform, false);
 			return baseObject as T;
 		}
@@ -122,6 +132,8 @@ public class Gameplay : MonoBehaviour {
 
 		m_ballPlayer = SpawnGameObject<BallPlayer> ("BallPlayer");
 		m_ballPlayer.SetMapPos (Vector2.zero);
+
+		m_scoreText.text = m_score.ToString ();
 	}
 
 	public void EndGame(bool bWin)
@@ -130,6 +142,8 @@ public class Gameplay : MonoBehaviour {
 			return;
 		}
 		m_bEnded = true;
+		m_scoreText.text = "";
+		m_resultPopup.Show (m_score);
 	}
 
 	private void UpdateInput()
@@ -229,7 +243,6 @@ public class Gameplay : MonoBehaviour {
 		int maxJumpDist = (int)GetCurrenMoveXSpeed() - 2;
 
 		List<int> heightMaps = LevelGenerator.RandomZoneMap (5, 5, 5, maxJumpDist);
-
 		m_workingLevelDTO.SetHeightMap (heightMaps);
 
 		int maxGround = heightMaps.Count;
@@ -237,24 +250,31 @@ public class Gameplay : MonoBehaviour {
 		while (startGround < maxGround)
 		{
 			int lineHeight = heightMaps[startGround];
-//			int endGround = startGround + 1;
-//			while (endGround < heightMaps.Count && heightMaps[startGround] == heightMaps[endGround])
-//			{
-//				endGround++;
-//			}
-			//int numSpace = (endGround - startGround);
+			int endGround = startGround + 1;
+			while (endGround < heightMaps.Count && heightMaps[startGround] == heightMaps[endGround])
+			{
+				endGround++;
+			}
+			int numSpace = (endGround - startGround);
 			if (lineHeight < 0) //need jump
 			{
-				PlacementObjectDTO groundInfo = new PlacementObjectDTO();
-				groundInfo.ObjectType = ObjectType.SquareObstacle;
-				groundInfo.SizeX = 1;
-				groundInfo.SizeY = 1;
-				groundInfo.MapX = startGround;
-				groundInfo.MapY = 0;
-				m_workingLevelDTO.PlacementObjects.Add(groundInfo);
+				//To force player do jump over [numSpace] unit, We just need set 1 SquareObstacle at middle has enough tall.
+				for (int i = 0; i < numSpace; i++) {
+					int mid = (numSpace - 1) /2;
+					if (i == (int)mid) {
+						PlacementObjectDTO groundInfo = new PlacementObjectDTO ();
+						groundInfo.ObjectType = ObjectType.SquareObstacle;
+						//groundInfo.SizeX = numSpace;
+						groundInfo.SizeX = 1;
+
+						groundInfo.SizeY = 0.8f + 0.3f * (mid * mid - (mid - i) * (mid - i));
+						groundInfo.MapX = startGround + i;
+						groundInfo.MapY = 0;
+						m_workingLevelDTO.PlacementObjects.Add (groundInfo);
+					}
+				}
 			}				
-			//startGround = endGround;
-			startGround++;
+			startGround = endGround;
 		}
 	}
 
@@ -277,7 +297,7 @@ public class Gameplay : MonoBehaviour {
 
 		List<PlacementObjectDTO> placementObjectDTOs = m_workingLevelDTO.PlacementObjects;
 		for (int i = 0; i < placementObjectDTOs.Count; i++) {
-			if (placementObjectDTOs [i].MapX < m_levelSubStep || placementObjectDTOs [i].MapX > m_levelSubStep + maxGround) {
+			if (placementObjectDTOs [i].MapX < m_levelSubStep || placementObjectDTOs [i].MapX >= m_levelSubStep + maxGround) {
 				continue;
 			}
 			ObjectType objectType = placementObjectDTOs [i].ObjectType;
@@ -288,9 +308,8 @@ public class Gameplay : MonoBehaviour {
 			if (objectType == ObjectType.SquareObstacle)
 			{
 				BaseObject squareObstacle = SpawnGameObject<BaseObject> ("SquareObstacleObject");
-//				GameObject ground = NewGround();
 				squareObstacle.SetMapPos(spawnPos);
-//				ground.transform.localScale = zoneSize;
+				squareObstacle.transform.localScale = zoneSize;
 			}
 
 		}

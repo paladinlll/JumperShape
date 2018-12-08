@@ -25,7 +25,8 @@ public class BaseObject : MonoBehaviour {
 		}
 	}
 
-
+	public virtual void Init(){
+	}
 
 	public virtual void SetMapPos(Vector2 mapPos){
 		m_mapPos = mapPos;

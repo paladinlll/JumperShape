@@ -12,4 +12,7 @@ public class GameDefines {
 	public const int GAME_UNIT = 120;
 	public const float HEIGHT_PAD = 1.2f;
 
+
+	public const long LOCAL_ERROR_NOT_INITIALIZE = 1;
+	public const long LOCAL_ERROR_TIME_OUT = 2;
 }

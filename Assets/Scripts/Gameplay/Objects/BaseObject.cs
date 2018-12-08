@@ -4,19 +4,32 @@ using UnityEngine;
 
 public class BaseObject : MonoBehaviour {
 
-	private bool m_spriteRendererChecked = false;
-	private SpriteRenderer m_spriteRenderer;
-	public SpriteRenderer spriteRenderer
+	private RectTransform m_rectTransform;
+	public RectTransform rectTransform
 	{
 		get
 		{
-			if (!m_spriteRendererChecked)
+			if (m_rectTransform == null)
 			{
-				m_spriteRendererChecked = true;
-				m_spriteRenderer = gameObject.GetComponentInChildren<SpriteRenderer> ();
+				m_rectTransform = gameObject.GetComponent<RectTransform> ();
 			}
-			return m_spriteRenderer;
+			return m_rectTransform;
 		}
+	}
+
+	protected Vector2 m_mapPos;
+
+	public Vector2 mapPos {
+		get {
+			return m_mapPos;
+		}
+	}
+
+
+
+	public virtual void SetMapPos(Vector2 mapPos){
+		m_mapPos = mapPos;
+		rectTransform.anchoredPosition = m_mapPos * GameDefines.GAME_UNIT;
 	}
 
 	// Use this for initialization
@@ -24,6 +37,7 @@ public class BaseObject : MonoBehaviour {
     
     }
 	
-
+	public virtual void OnGameStep (float dtTime) {		
+	}
   
 }

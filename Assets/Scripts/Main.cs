@@ -44,7 +44,7 @@ public class Main : MonoBehaviour {
 			//Wait until the last operation fully loads to return anything
 			while (!asyncLoad.isDone)
 			{
-				loadingLayer.UpdateProcessStep(asyncLoad.progress);
+				//loadingLayer.UpdateProcessStep(asyncLoad.progress);
 				yield return null;
 			}
 		}

@@ -91,8 +91,30 @@ public class GameObjectPreloader : MonoBehaviour {
 		return Instance.GetNextObject (objectName);
 	}
 
-	public static void Fetch(){
-		
+	public static void Fetch(System.Action cb){
+		PreloadObject ("BallPlayer");
+
+		if (cb != null) {
+			Instance.WaitFinish (cb);
+		}
+	}
+
+	public void WaitFinish(System.Action cb)
+	{
+		StartCoroutine(IWaitFinish(cb));
+	}
+
+	IEnumerator IWaitFinish(System.Action cb)
+	{
+		while (!AllObjectsLoaded)
+		{
+			yield return new WaitForSeconds(0.01f);
+		}
+
+		if (cb != null)
+		{
+			cb();
+		}
 	}
 
 	public static void ClearAll(){

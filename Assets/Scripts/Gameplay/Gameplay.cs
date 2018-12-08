@@ -18,7 +18,22 @@ public class Gameplay : MonoBehaviour {
 	}
 
 	[SerializeField]
+	LoadingLayer m_loadingLayer;
+
+	[SerializeField]
 	Canvas m_mainCanvas;
+
+	public float CanvasScale {
+		get {
+			return m_mainCanvas.transform.localScale.x;	
+		}
+	}
+
+	public float GameUnitScaled {
+		get {
+			return GameDefines.GAME_UNIT * CanvasScale;
+		}
+	}
 
 	[SerializeField]
 	ParallaxBkgController m_parallaxBackground;
@@ -34,10 +49,15 @@ public class Gameplay : MonoBehaviour {
 
 	List<GameObject> m_grounds = new List<GameObject>();
 
+	BallPlayer m_ballPlayer;
+
+	[SerializeField]
+	GameObject m_prepareLayer;
+
 	float m_mapMaxView = 0;
 	float m_mapWeight = 0;
 
-	List<GameObject> m_activeObjects = new List<GameObject>();
+	//List<GameObject> m_activeObjects = new List<GameObject>();
 
 	LevelDTO m_workingLevelDTO = new LevelDTO();
 	int m_levelSubStep;
@@ -45,17 +65,62 @@ public class Gameplay : MonoBehaviour {
 	bool m_bEnded;
 	bool m_bPausing;
 
+	public float GetCurrenMoveXSpeed()
+	{
+		return 4;
+	}
+
 	// Use this for initialization
 	void Start () {
+		Physics2D.autoSimulation = false;
+		m_prepareLayer.SetActive (false);
+		//Load minimium object. Will show loading screen until it has done.
+		m_loadingLayer.Show();
+		GameObjectPreloader.Fetch(() =>{
+			m_loadingLayer.Hide();
+			m_prepareLayer.SetActive (true);
+		});
+
 		Reset ();
 	}
 
 	public void Reset()
 	{
+		m_bEnded = true;
+		m_bPausing = false;
+
+	}
+
+	public T SpawnGameObject<T>() where T : BaseObject
+	{
+		BaseObject baseObject = null;
+		string className = typeof(T).FullName;
+		switch (className) {
+		case "BallPlayer":
+			baseObject = GameObjectPreloader.SpawnGameObject (className);
+			break;
+		default:
+			Debug.LogErrorFormat("no have [{0}] in preloads resource", className);
+			break;
+		};
+
+		if (baseObject != null) {
+			baseObject.transform.SetParent (m_objectHolder.transform, false);
+			return baseObject as T;
+		}
+		return null;
+	}
+
+	public void PlayGame(){
+		m_prepareLayer.SetActive (false);
 		m_bEnded = false;
 		m_bPausing = false;
+
 		m_workingLevelDTO.Clear ();
 		m_levelSubStep = 0;
+
+		m_ballPlayer = SpawnGameObject<BallPlayer> ();
+		m_ballPlayer.SetMapPos (Vector2.zero);
 	}
 
 	public void EndGame(bool bWin)
@@ -124,9 +189,15 @@ public class Gameplay : MonoBehaviour {
 		Vector2 canvasPos;
 		RectTransformUtility.ScreenPointToLocalPointInRectangle(mainRect, toughPos, m_mainCanvas.worldCamera, out canvasPos);
 
+		if (m_ballPlayer != null && m_ballPlayer.gameObject.activeSelf) {
+			m_ballPlayer.SignalJump ();
+		}
 	}
 	public void OnTapUp(int touchId)
 	{
+		if (m_ballPlayer != null && m_ballPlayer.gameObject.activeSelf) {
+			m_ballPlayer.ReleaseJump ();
+		}
 	}
 	public void OnTapMove(int touchId, Vector2 toughPos)
 	{
@@ -186,27 +257,7 @@ public class Gameplay : MonoBehaviour {
 		}
 	}
 
-	private GameObject NewGround(){
-		int freeSlot = -1;
-		for (int i = 0; i < m_activeObjects.Count; i++) {
-			if (!m_activeObjects [i].activeSelf) {
-				freeSlot = i;
-				break;
-			}
-		}
 
-		GameObject ground = null;
-		if (freeSlot != -1) {
-			ground = m_activeObjects [freeSlot];
-		} else {
-			ground = Instantiate (m_sampleGround, m_objectHolder);
-			ground.transform.localScale = Vector2.one;
-			m_activeObjects.Add (ground);
-		}
-
-		ground.SetActive (true);
-		return ground;
-	}
 
 	private void GenerateZoneMap(float initDist)
 	{
@@ -235,15 +286,12 @@ public class Gameplay : MonoBehaviour {
 
 			if (objectType == ObjectType.Ground)
 			{
-				GameObject ground = NewGround();
-				ground.gameObject.GetComponent<RectTransform>().anchoredPosition = spawnPos * GameDefines.GAME_UNIT;
-				ground.transform.localScale = zoneSize;
+//				GameObject ground = NewGround();
+//				ground.gameObject.GetComponent<RectTransform>().anchoredPosition = spawnPos * GameDefines.GAME_UNIT;
+//				ground.transform.localScale = zoneSize;
 			}
 
 		}
-//		GameObject ground = NewGround();
-//		ground.transform.localPosition = new Vector2(initDist, 0) * GameDefines.GAME_UNIT;
-
 		m_levelSubStep += maxGround;
 		m_mapMaxView += maxGround;
 	}
@@ -252,16 +300,19 @@ public class Gameplay : MonoBehaviour {
 	{
 		float dtTime = Time.deltaTime;
 
-		Debug.LogFormat ("QuerryAndChop {0} = {1} / {2}", chopX / dtTime, chopX, dtTime);
-
+		GameObjectPreloader.QueryAllActivated(ref m_activeObjects);
 		for (int i = 0; i < m_activeObjects.Count; i++) {
-			if (!m_activeObjects [i].activeSelf) {
+			if (!m_activeObjects [i].gameObject.activeSelf) {
 				continue;
 			}
-			GameObject p = m_activeObjects [i];
-			Vector2 nextPos = p.transform.localPosition;
-			nextPos.x -= chopX * GameDefines.GAME_UNIT;
-			p.transform.localPosition = nextPos;
+			BaseObject p = m_activeObjects [i];
+			Vector2 nextPos = p.mapPos;
+			nextPos.x -= chopX;
+			p.SetMapPos(nextPos);
+
+//			Vector2 nextPos = p.transform.localPosition;
+//			nextPos.x -= chopX * GameDefines.GAME_UNIT;
+//			p.transform.localPosition = nextPos;
 
 			if (nextPos.x < -30 * GameDefines.GAME_UNIT) {
 				p.gameObject.SetActive (false);
@@ -279,10 +330,44 @@ public class Gameplay : MonoBehaviour {
 		if (m_bPausing) {
 			return;
 		}
+		OnGameStep ();
 
 		UpdateInput ();
+	}
 
-		float chopX = Time.deltaTime * 4;
+	List<BaseObject> m_activeObjects = new List<BaseObject>();
+	private float m_dtGameTime = 0;
+	private float m_pendingGameTime = 0;
+	void OnGameStep()
+	{
+		m_pendingGameTime += Time.deltaTime;
+		int numStep = (int)(m_pendingGameTime / 0.005f);
+		if (numStep <= 0) {
+			return;
+		}
+		float dtTime = numStep * 0.005f;
+		m_pendingGameTime -= dtTime;
+
+		//limit lag time
+		if (dtTime > 0.5f) {
+			dtTime = 0.5f;
+		}
+
+		m_dtGameTime = dtTime;
+
+		//We just need Physics2D to check collision.
+		Physics2D.Simulate(dtTime);
+
+		//The movement will be hadled manual in this
+		foreach (var p in m_activeObjects)
+		{
+			p.OnGameStep(dtTime);
+		}
+
+		float chopX = 0;//m_dtGameTime * GetCurrenMoveXSpeed();
+		if (m_ballPlayer != null) {
+			chopX = m_ballPlayer.mapPos.x;
+		}
 		m_parallaxBackground.DoScroll (chopX * GameDefines.GAME_UNIT);
 
 		m_mapWeight += chopX;

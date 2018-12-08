@@ -51,6 +51,12 @@ public class Gameplay : MonoBehaviour {
 	ResultPopup m_resultPopup;
 
 	[SerializeField]
+	GameObject m_igmLayer;
+
+	[SerializeField]
+	GameObject m_hudLayer;
+
+	[SerializeField]
 	TextMeshProUGUI m_scoreText;
 
 	float m_mapMaxView = 0;
@@ -89,6 +95,8 @@ public class Gameplay : MonoBehaviour {
 		GameObjectPreloader.ClearAll ();
 		m_prepareLayer.SetActive (true);
 		m_resultPopup.gameObject.SetActive (false);
+		m_igmLayer.SetActive (false);
+		m_hudLayer.SetActive (false);
 		m_bEnded = true;
 		m_bPausing = false;
 		m_score = 0;
@@ -96,7 +104,7 @@ public class Gameplay : MonoBehaviour {
 	}
 
 	public void GainScore(){
-		m_score++;
+		m_score += 10;
 		m_scoreText.text = m_score.ToString ();
 	}
 
@@ -124,6 +132,7 @@ public class Gameplay : MonoBehaviour {
 
 	public void PlayGame(){
 		m_prepareLayer.SetActive (false);
+		m_hudLayer.SetActive (true);
 		m_bEnded = false;
 		m_bPausing = false;
 
@@ -144,6 +153,7 @@ public class Gameplay : MonoBehaviour {
 		m_bEnded = true;
 		m_scoreText.text = "";
 		m_resultPopup.Show (m_score);
+		m_hudLayer.SetActive (false);
 	}
 
 	private void UpdateInput()
@@ -396,5 +406,26 @@ public class Gameplay : MonoBehaviour {
 		if (m_mapMaxView - m_mapWeight < 10) {			
 			GenerateZoneMap(m_mapMaxView - m_mapWeight);
 		}
+	}
+
+	public void OnPauseButtonClicked(){
+		m_igmLayer.SetActive (true);
+		m_bPausing = true;
+	}
+
+	public void OnResumeButtonCLicked(){
+		m_igmLayer.SetActive (false);
+		m_bPausing = false;
+	}
+
+	public void QuitGame()
+	{		
+		#if UNITY_EDITOR
+		// Application.Quit() does not work in the editor so
+		// UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
+		UnityEditor.EditorApplication.isPlaying = false;
+		#else
+		Application.Quit();
+		#endif
 	}
 }

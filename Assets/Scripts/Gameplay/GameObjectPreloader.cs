@@ -93,6 +93,7 @@ public class GameObjectPreloader : MonoBehaviour {
 
 	public static void Fetch(System.Action cb){
 		PreloadObject ("BallPlayer");
+		PreloadObject ("SquareObstacleObject", 50);
 
 		if (cb != null) {
 			Instance.WaitFinish (cb);

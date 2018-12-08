@@ -62,7 +62,8 @@ public class BallPlayer : BaseObject {
 //		}
 
 		//BaseObject baseObject = coll.gameObject.GetComponent<BaseObject> ();
-		if (coll.gameObject.tag == "Ground") {
+		if (coll.gameObject.tag == "Ground" ||
+			coll.gameObject.tag == "Obstacle") {
 			if (m_jumpTime > 0.1f) {
 				EndJump ();
 			}
@@ -147,9 +148,9 @@ public class BallPlayer : BaseObject {
 		if (m_bJumping) {	
 			m_jumpTime += dtTime;
 			float t = m_jumpTime;
-			float durarion = 2 * (1.1f + m_releaseJumpTime);
-			float maxYFactor = 2 * durarion;
-			durarion /= Gameplay.Instance.GetCurrenMoveXSpeed ();
+			float durarion = 0.6f + m_releaseJumpTime;
+			float maxYFactor = 10 * durarion;
+			//durarion /= Gameplay.Instance.GetCurrenMoveXSpeed ();
 			float nextY = m_beginJumpY + maxYFactor * (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f));
 
 
@@ -157,11 +158,16 @@ public class BallPlayer : BaseObject {
 			rigidbody2D.velocity = vel;
 
 			m_maxYJump = Mathf.Max (m_maxYJump, mapPos.y);
+
+			//Keep force x when not falling back.
+			if (vel.x >= 0.0f) {
+				vel.x = Gameplay.Instance.GameUnitScaled * Gameplay.Instance.GetCurrenMoveXSpeed ();
+			}
 		} else {
 			vel.x = Gameplay.Instance.GameUnitScaled * Gameplay.Instance.GetCurrenMoveXSpeed ();
-			rigidbody2D.velocity = vel;
 		}
 
+		rigidbody2D.velocity = vel;
 		Vector2 nextMapPos = this.mapPos + rigidbody2D.velocity * dtTime / Gameplay.Instance.GameUnitScaled;
 		this.SetMapPos(nextMapPos);
 

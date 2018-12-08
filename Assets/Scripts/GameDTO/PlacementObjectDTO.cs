@@ -6,7 +6,7 @@ namespace GameDTO
 		None = -1,
 		Ground = 0,
 		Player,
-		Bomb,
+		SquareObstacle,
 	};
 
 	public class PlacementObjectDTO

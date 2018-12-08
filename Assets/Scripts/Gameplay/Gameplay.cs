@@ -67,7 +67,7 @@ public class Gameplay : MonoBehaviour {
 
 	public float GetCurrenMoveXSpeed()
 	{
-		return 4;
+		return 7;
 	}
 
 	// Use this for initialization
@@ -91,12 +91,13 @@ public class Gameplay : MonoBehaviour {
 
 	}
 
-	public T SpawnGameObject<T>() where T : BaseObject
+	public T SpawnGameObject<T>(string className) where T : BaseObject
 	{
 		BaseObject baseObject = null;
-		string className = typeof(T).FullName;
+		//string className = typeof(T).FullName;
 		switch (className) {
 		case "BallPlayer":
+		case "SquareObstacleObject":
 			baseObject = GameObjectPreloader.SpawnGameObject (className);
 			break;
 		default:
@@ -119,7 +120,7 @@ public class Gameplay : MonoBehaviour {
 		m_workingLevelDTO.Clear ();
 		m_levelSubStep = 0;
 
-		m_ballPlayer = SpawnGameObject<BallPlayer> ();
+		m_ballPlayer = SpawnGameObject<BallPlayer> ("BallPlayer");
 		m_ballPlayer.SetMapPos (Vector2.zero);
 	}
 
@@ -223,12 +224,11 @@ public class Gameplay : MonoBehaviour {
 
 	}
 
+
 	private void LoadLevelMap() {;
-		List<int> heightMaps = new List<int>();
-		for (int i = 0; i < 12; i++)
-		{
-			heightMaps.Add(i == 4 ? -1 : 0);
-		}
+		int maxJumpDist = (int)GetCurrenMoveXSpeed() - 2;
+
+		List<int> heightMaps = LevelGenerator.RandomZoneMap (5, 5, 5, maxJumpDist);
 
 		m_workingLevelDTO.SetHeightMap (heightMaps);
 
@@ -237,23 +237,24 @@ public class Gameplay : MonoBehaviour {
 		while (startGround < maxGround)
 		{
 			int lineHeight = heightMaps[startGround];
-			int endGround = startGround + 1;
-			while (endGround < heightMaps.Count && heightMaps[startGround] == heightMaps[endGround])
-			{
-				endGround++;
-			}
-			int numSpace = (endGround - startGround);
-			if (lineHeight >= 0)
+//			int endGround = startGround + 1;
+//			while (endGround < heightMaps.Count && heightMaps[startGround] == heightMaps[endGround])
+//			{
+//				endGround++;
+//			}
+			//int numSpace = (endGround - startGround);
+			if (lineHeight < 0) //need jump
 			{
 				PlacementObjectDTO groundInfo = new PlacementObjectDTO();
-				groundInfo.ObjectType = ObjectType.Ground;
-				groundInfo.SizeX = numSpace;
-				groundInfo.SizeY = lineHeight * GameDefines.HEIGHT_PAD + (GameDefines.HEIGHT_PAD * 2);
+				groundInfo.ObjectType = ObjectType.SquareObstacle;
+				groundInfo.SizeX = 1;
+				groundInfo.SizeY = 1;
 				groundInfo.MapX = startGround;
-				groundInfo.MapY = lineHeight;
+				groundInfo.MapY = 0;
 				m_workingLevelDTO.PlacementObjects.Add(groundInfo);
 			}				
-			startGround = endGround;
+			//startGround = endGround;
+			startGround++;
 		}
 	}
 
@@ -284,10 +285,11 @@ public class Gameplay : MonoBehaviour {
 			Vector2 zoneSize = new Vector2(placementObjectDTOs[i].SizeX, placementObjectDTOs[i].SizeY);
 			Vector2 spawnPos = new Vector2(initDist + placementObjectDTOs[i].MapX, placementObjectDTOs[i].MapY * GameDefines.HEIGHT_PAD);
 
-			if (objectType == ObjectType.Ground)
+			if (objectType == ObjectType.SquareObstacle)
 			{
+				BaseObject squareObstacle = SpawnGameObject<BaseObject> ("SquareObstacleObject");
 //				GameObject ground = NewGround();
-//				ground.gameObject.GetComponent<RectTransform>().anchoredPosition = spawnPos * GameDefines.GAME_UNIT;
+				squareObstacle.SetMapPos(spawnPos);
 //				ground.transform.localScale = zoneSize;
 			}
 
@@ -314,7 +316,7 @@ public class Gameplay : MonoBehaviour {
 //			nextPos.x -= chopX * GameDefines.GAME_UNIT;
 //			p.transform.localPosition = nextPos;
 
-			if (nextPos.x < -30 * GameDefines.GAME_UNIT) {
+			if (nextPos.x < -30) {
 				p.gameObject.SetActive (false);
 			}
 		}

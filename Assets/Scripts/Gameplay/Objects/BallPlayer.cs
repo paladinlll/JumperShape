@@ -152,7 +152,6 @@ public class BallPlayer : BaseObject {
 			float t = m_jumpTime;
 			float durarion = 0.45f + m_releaseJumpTime;
 			float maxYFactor = 10 * durarion;
-			//durarion /= Gameplay.Instance.GetCurrenMoveXSpeed ();
 			float nextY = m_beginJumpY + maxYFactor * (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f));
 
 

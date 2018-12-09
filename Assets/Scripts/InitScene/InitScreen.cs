@@ -15,6 +15,7 @@ public class InitScreen : MonoBehaviour {
 		//	m_tapImage.color = new Color(1, 1, 1, val > 1 ? 1 : val);
 		//});
 		GameServerAPI.Instance.Init();
+		Main.Instance.LoadScene("Gameplay");
 	}
 
 	void OnDestroy() {
@@ -24,8 +25,8 @@ public class InitScreen : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (Input.anyKeyDown) {
-			Main.Instance.LoadScene("MainMenu");
-		}	
+//		if (Input.anyKeyDown) {
+//			Main.Instance.LoadScene("Gameplay");
+//		}	
 	}
 }

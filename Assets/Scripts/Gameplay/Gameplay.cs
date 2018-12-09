@@ -296,12 +296,13 @@ public class Gameplay : MonoBehaviour {
 			m_workingLevelDTO.Clear();
 			m_levelSubStep = 0;
 			LoadLevelMap();
-			//GameObjectPreloader.PreloadLevel(m_workingLevelConfig, CountZombie());
+
+			//Can do some preload at here but skip for now.
+			//GameObjectPreloader.Preload(...);
 		} else {
 			initDist -= m_levelSubStep;
 		}
-
-		//int maxGround = 20;
+			
 		List<int> heightMaps = m_workingLevelDTO.GetHeightMap();
 		int maxGround = Mathf.Min(10, heightMaps.Count - m_levelSubStep);
 
@@ -353,6 +354,11 @@ public class Gameplay : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		#if UNITY_EDITOR
+		if (Input.GetKeyDown("f9")) {
+			TakeScreenShot();
+		}
+		#endif
 
 		if (m_bEnded) {			
 			return;
@@ -395,14 +401,18 @@ public class Gameplay : MonoBehaviour {
 			p.OnGameStep(dtTime);
 		}
 
-		float chopX = 0;//m_dtGameTime * GetCurrenMoveXSpeed();
+		float chopX = 0;
+		//Always set ball at root
 		if (m_ballPlayer != null) {
 			chopX = m_ballPlayer.mapPos.x;
 		}
 		m_parallaxBackground.DoScroll (chopX * GameDefines.GAME_UNIT);
 
 		m_mapWeight += chopX;
+		//Move all activated objects foollow ball.
 		QuerryAndChop (chopX);
+
+		//Generate more objects when only 10 unit remain.
 		if (m_mapMaxView - m_mapWeight < 10) {			
 			GenerateZoneMap(m_mapMaxView - m_mapWeight);
 		}
@@ -428,4 +438,29 @@ public class Gameplay : MonoBehaviour {
 		Application.Quit();
 		#endif
 	}
+
+	#if UNITY_EDITOR
+	int m_lastShotIndex = 0;
+	public void TakeScreenShot()
+	{
+		int resWidth = Camera.main.pixelWidth;
+		int resHeight = Camera.main.pixelHeight;
+		Camera camera = Camera.main;
+		RenderTexture rt = new RenderTexture(resWidth, resHeight, 32);
+		camera.targetTexture = rt;
+		Texture2D screenShot = new Texture2D(resWidth, resHeight, TextureFormat.ARGB32, false);
+		camera.Render();
+		RenderTexture.active = rt;
+		screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+		screenShot.Apply ();
+		camera.targetTexture = null;
+		RenderTexture.active = null; // JC: added to avoid errors
+		Destroy(rt);
+
+		byte[] bytes = screenShot.EncodeToPNG();
+		System.IO.File.WriteAllBytes(string.Format("{0}.png", m_lastShotIndex), bytes);
+
+		m_lastShotIndex++;
+	}
+	#endif
 }

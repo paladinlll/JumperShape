@@ -21,9 +21,13 @@ y = maxYFactor * (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f))
 ![](./images/1.png)
 
 ## Manual Movement handle
-** We just need Physics2D to check collision.
-```Physics2D.Simulate(dtTime);```
-** In the circle. The rigidbody2D.velocity.x always be fixed. When jumping, the rigidbody2D.velocity.y will be calculate follow above idea. The jump action will be break it the cirle enter collision with the Ground. The final position will be calculate base on that rigidbody2D.velocity and time.
+* We just need Physics2D to check collision.
+```
+Physics2D.autoSimulation = false;
+...
+Physics2D.Simulate(dtTime);
+```
+* In the circle. The rigidbody2D.velocity.x always be fixed. When jumping, the rigidbody2D.velocity.y will be calculate follow above idea. The jump action will be break it the cirle enter collision with the Ground. The final position will be calculate base on that rigidbody2D.velocity and time.
 
 ## Random Obstacles
 * Base on core gameplay, basiclly we has 3 three kind obstacles matched with 3 kind of jumps (tap, short press, long press). We can make it more difficult by make obstacle moving,... but in this step we just care about which action we expected player do. Let call it is: SHORT_JUMP, MEDIUM_JUMP, LONG_JUMP

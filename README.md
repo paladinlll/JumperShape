@@ -2,15 +2,15 @@
 * The circle only has one action is jump. Because it is scrolling game, the Physic engine couldn't control the movement correctly. So I'll handle it manualy but still used physic engine to check collision.
 * Just jump is so simple, may we can do some thing hardcore as Flappy bird, but I don't like to do so. I let the circle can jump more far by keep press in a time.
 * Now, I need a function to calculate circle coordinates by time that I can control how far and how tall.
-** The speed x was be normalize with time. It mean in t time, circle will be moved t unit.
-** When pressed jump, we want cirle'll jump in [duration] time (moved [duration] unit in x coordinate). I has this:
+`The speed x was be normalize with time. It mean in t time, circle will be moved t unit.`
+`When pressed jump, we want cirle'll jump in [duration] time (moved [duration] unit in x coordinate). I has this:`
 ```
 y = (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f))
 ```
-when t = 0 then y = 0.
-when t = durarion then y = 0.
-Maximium y = 0.25 (unit)
-To control how tall. I multiply it with a maxYFactor. 
+`when t = 0 then y = 0.`
+`when t = durarion then y = 0.`
+`Maximium y = 0.25 (unit)`
+`To control how tall. I multiply it with a maxYFactor. `
 
 ```
 y = maxYFactor * (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f))
@@ -20,10 +20,10 @@ y = maxYFactor * (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f))
 ## Random Obstacles
 * Base on core gameplay, basiclly we has 3 three kind obstacles matched with 3 kind of jumps (tap, short press, long press). We can make it more difficult by make obstacle moving,... but in this step we just care about which action we expected player do. Let call it is: SHORT_JUMP, MEDIUM_JUMP, LONG_JUMP
 * The expect actions will is a list jumps with some gap time. EX:
-SHORT_JUMP [1s] SHORT_JUMP[1s] MEDIUM_JUMP [2s] SHORT_JUMP[1s] LONG_JUMP [1s] SHORT_JUMP[1s] ...
+`SHORT_JUMP [1s] SHORT_JUMP[1s] MEDIUM_JUMP [2s] SHORT_JUMP[1s] LONG_JUMP [1s] SHORT_JUMP[1s] ...`
 * Improve the feeling by make it has own beat. EX:
-SHORT_JUMP SHORT_JUMP MEDIUM_JUMP [2s] SHORT_JUMP LONG_JUMP [1s],...
-For more detail please check on LevelGenerator.cs
+`SHORT_JUMP SHORT_JUMP MEDIUM_JUMP [2s] SHORT_JUMP LONG_JUMP [1s],...`
+`For more detail please check on LevelGenerator.cs`
 
 ## Pooling technique
 * We'll preload minimium objects required for game at begin, show the loading popup until it has finished.

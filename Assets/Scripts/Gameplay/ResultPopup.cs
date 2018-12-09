@@ -19,7 +19,7 @@ public class ResultPopup : MonoBehaviour {
 		WWWForm form = new WWWForm ();
 		form.AddField ("userName", OnlinePlayerProfile.Instance.dataInfo.m_localId);
 		form.AddField ("score", score);
-		GameServerAPI.Instance.PostAPI ("leaderboard", form, (err, DataConfigMrg) => {
+		GameServerAPI.Instance.PostAPI ("leaderboard", form, (err, data) => {
 			if(err != null){
 				Debug.LogError(err.errorMessage);
 			}

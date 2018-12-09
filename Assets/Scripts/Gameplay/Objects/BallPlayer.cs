@@ -45,23 +45,7 @@ public class BallPlayer : BaseObject {
 		rigidbody2D.gravityScale = Gameplay.Instance.GameUnitScaled;
 	}
 
-//	public void OnTriggerEnter2D(Collider2D other){
-//		Debug.LogFormat ("{0}", other.gameObject.name);
-//		Vector2 vec = (Vector2)other.transform.position - (Vector2)transform.position;
-//		m_dir.localRotation = Quaternion.AngleAxis (Mathf.Atan2 (vec.y, vec.x) * Mathf.Rad2Deg, Vector3.forward);
-//
-//	}
-
 	public void OnCollisionEnter2D(Collision2D coll) {
-//		if (coll.contacts.Length == 1) {
-//			Vector2 vec = coll.contacts [0].point - (Vector2)transform.position;
-//			m_dir.localRotation = Quaternion.AngleAxis (Mathf.Atan2 (vec.y, vec.x) * Mathf.Rad2Deg, Vector3.forward);
-//			Debug.LogFormat ("{0} - {1}", coll.gameObject.name, vec);
-//		} else {
-//			Debug.LogFormat ("{0} - {1}", coll.gameObject.name, coll.contacts.Length);
-//		}
-
-		//BaseObject baseObject = coll.gameObject.GetComponent<BaseObject> ();
 		if (coll.gameObject.tag == "Ground") {
 			if (m_jumpTime > 0.1f) {
 				EndJump ();
@@ -130,18 +114,7 @@ public class BallPlayer : BaseObject {
 
 	// Update is called once per frame
 	void Update () {
-//		float dt = Time.deltaTime;
-//		Vector2 nextPos = m_rect.anchoredPosition;
-//		if (Input.GetKey (KeyCode.DownArrow)) {
-//			nextPos.y -= 500 * dt;
-//		} else if (Input.GetKey (KeyCode.UpArrow)) {
-//			nextPos.y += 500 * dt;
-//		} else if (Input.GetKey (KeyCode.LeftArrow)) {
-//			nextPos.x -= 500 * dt;
-//		} else if (Input.GetKey (KeyCode.RightArrow)) {
-//			nextPos.x += 500 * dt;
-//		}
-//		m_rect.anchoredPosition = nextPos;
+
 
 	}
 

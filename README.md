@@ -20,6 +20,11 @@ y = maxYFactor * (0.25f - (t / durarion - 0.5f) * (t / durarion - 0.5f))
 ```
 ![](./images/1.png)
 
+## Manual Movement handle
+** We just need Physics2D to check collision.
+```Physics2D.Simulate(dtTime);```
+** In the circle. The rigidbody2D.velocity.x always be fixed. When jumping, the rigidbody2D.velocity.y will be calculate follow above idea. The jump action will be break it the cirle enter collision with the Ground. The final position will be calculate base on that rigidbody2D.velocity and time.
+
 ## Random Obstacles
 * Base on core gameplay, basiclly we has 3 three kind obstacles matched with 3 kind of jumps (tap, short press, long press). We can make it more difficult by make obstacle moving,... but in this step we just care about which action we expected player do. Let call it is: SHORT_JUMP, MEDIUM_JUMP, LONG_JUMP
 * The expect actions will is a list jumps with some gap time. EX:
@@ -37,7 +42,8 @@ GameObjectPreloader.Fetch(() =>{
 });
 ```
 * The preload objects will be load one by one in a StartCoroutine. In case we need an object the hasn't been loadded, it'll be forced to load it.
-
+* We don't load everything to screen. We just load the object when it is in about 10 unit(1200 pixel) with the circle.
+* Each time generator a new part of game. We has enough infomation to preload the objects before it was be used.
 
 ## Leaderboard Service Information
 Leaderboard service doesn't exist yet, but will be built at a future time. It will be call when showing reult popup.
